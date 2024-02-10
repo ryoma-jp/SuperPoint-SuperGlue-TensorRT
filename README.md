@@ -21,6 +21,13 @@ docker pull yuefan2022/tensorrt-ubuntu20.04-cuda11.6:latest
 docker run -it --env DISPLAY=$DISPLAY --volume /tmp/.X11-unix:/tmp/.X11-unix --privileged --runtime nvidia --gpus all --volume ${PWD}:/workspace --workdir /workspace --name tensorrt yuefan2022/tensorrt-ubuntu20.04-cuda11.6:latest /bin/bash
 ```
 
+## Docker(for WSL2)
+```bash
+docker-compose build
+docker-compose up -d
+docker-compose exec --user $UID bash
+```
+
 ## Environment required
 * CUDA==11.6
 * TensorRT==8.4.1.5

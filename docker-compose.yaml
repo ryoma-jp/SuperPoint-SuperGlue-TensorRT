@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  env:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DISPLAY=$DISPLAY
+    working_dir: /workspace
+    command: >
+      bash -c "
+        cd /workspace && 
+        jupyter notebook --allow-root
+      "
+    volumes:
+      - type: bind
+        source: .
+        target: /workspace
+      - type: bind
+        source: /tmp/.X11-unix
+        target: /tmp/.X11-unix
+    ports:
+      - 35000:8888
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
