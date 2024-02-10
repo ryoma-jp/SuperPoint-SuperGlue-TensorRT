@@ -54,6 +54,8 @@ int main(int argc, char** argv){
     std::string mkdir_cmd = "mkdir -p " + output_path;
     system(mkdir_cmd.c_str());
 
+    std::ofstream log_file_all_feature_point(output_path + "/log_all_feature_point.csv");    // csv format: image index, keypoint index, feature point index, x, y, score
+    log_file_all_feature_point<<"image_index,keypoint_index,feature_point_index,x,y,score"<<std::endl;
     for (int index = 1; index < image_names.size(); ++index) {
         Eigen::Matrix<double, 259, Eigen::Dynamic> feature_points1;
         std::vector<cv::DMatch> superglue_matches;
@@ -77,16 +79,19 @@ int main(int argc, char** argv){
             double x = feature_points0(1, i);
             double y = feature_points0(2, i);
             keypoints0.emplace_back(x, y, 8, -1, score);
+            log_file_all_feature_point<<index<<","<<0<<","<<i<<","<<x<<","<<y<<","<<score<<std::endl;
         }
         for (size_t i = 0; i < feature_points1.cols(); ++i) {
             double score = feature_points1(0, i);
             double x = feature_points1(1, i);
             double y = feature_points1(2, i);
             keypoints1.emplace_back(x, y, 8, -1, score);
+            log_file_all_feature_point<<index<<","<<1<<","<<i<<","<<x<<","<<y<<","<<score<<std::endl;
         }
         VisualizeMatching(image0, keypoints0, image1, keypoints1, superglue_matches, match_image, duration.count());
         cv::imwrite(output_path + "/" + std::to_string(index) + ".png", match_image);
     }
-  
+    log_file_all_feature_point.close();
+
   return 0;
 }
