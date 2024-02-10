@@ -56,6 +56,8 @@ int main(int argc, char** argv){
 
     std::ofstream log_file_all_feature_point(output_path + "/log_all_feature_point.csv");    // csv format: image index, keypoint index, feature point index, x, y, score
     log_file_all_feature_point<<"image_index,keypoint_index,feature_point_index,x,y,score"<<std::endl;
+    std::ofstream log_file_match_points(output_path + "/log_match_points.csv");    // csv format: image index, keypoint0 feature point index, keypoint0 x, keypoint0 y, keypoint0 score, keypoint0 feature point index, keypoint1 x, keypoint1 y, keypoint1 score
+    log_file_match_points<<"image_index,keypoint0_feature_point_index,keypoint0_x,keypoint0_y,keypoint0_score,keypoint1_feature_point_index,keypoint1_x,keypoint1_y,keypoint1_score"<<std::endl;
     for (int index = 1; index < image_names.size(); ++index) {
         Eigen::Matrix<double, 259, Eigen::Dynamic> feature_points1;
         std::vector<cv::DMatch> superglue_matches;
@@ -70,6 +72,19 @@ int main(int argc, char** argv){
             return 0;
         }
         superglue->matching_points(feature_points0, feature_points1, superglue_matches);
+        //std::cout << "Matches: " << std::to_string(superglue_matches.size()) << std::endl;
+        //std::cout << "feature_points0: " << std::to_string(feature_points0.size()) << std::endl;
+        if (superglue_matches.size() > 0) {
+            for (auto &match : superglue_matches) {
+                log_file_match_points<<index<<","
+                                        <<match.queryIdx<<","
+                                        <<feature_points0(1, match.queryIdx)<<","<<feature_points0(2, match.queryIdx)<<","<<feature_points0(0, match.queryIdx)<<","
+                                        <<match.trainIdx<<","
+                                        <<feature_points1(1, match.trainIdx)<<","<<feature_points1(2, match.trainIdx)<<","<<feature_points1(0, match.trainIdx)<<std::endl;
+                //std::cout << "match: " << std::to_string(match.queryIdx) << ", " << std::to_string(match.trainIdx) << ", " << std::to_string(match.imgIdx) << std::endl;
+            }
+        }
+
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         cv::Mat match_image;
@@ -92,6 +107,7 @@ int main(int argc, char** argv){
         cv::imwrite(output_path + "/" + std::to_string(index) + ".png", match_image);
     }
     log_file_all_feature_point.close();
+    log_file_match_points.close();
 
   return 0;
 }
